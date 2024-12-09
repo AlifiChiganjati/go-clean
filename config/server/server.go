@@ -31,7 +31,6 @@ func NewServer() *Server {
 	control := manager.NewControlManager(uc)
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
-
 	return &Server{
 		control: control,
 		engine:  engine,

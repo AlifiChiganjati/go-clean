@@ -3,26 +3,37 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
-type ApiConfig struct {
-	ApiPort string
-}
+type (
+	ApiConfig struct {
+		ApiPort string
+	}
 
-type DbConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Name     string
-}
+	DbConfig struct {
+		Host     string
+		Port     string
+		User     string
+		Password string
+		Name     string
+	}
 
-type Config struct {
-	ApiConfig
-	DbConfig
-}
+	TokenConfig struct {
+		IssuerName      string
+		JwtSignatureKey []byte
+		JwtLifeTime     time.Duration
+	}
+
+	Config struct {
+		ApiConfig
+		DbConfig
+		TokenConfig
+	}
+)
 
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
@@ -48,7 +59,16 @@ func (c *Config) readConfig() error {
 		Password: os.Getenv("DB_PASSWORD"),
 		Name:     os.Getenv("DB_NAME"),
 	}
-	if c.ApiPort == "" || c.Host == "" || c.Port == "" || c.User == "" || c.Password == "" || c.Name == "" {
+	tokenLifeTime, err := strconv.Atoi(os.Getenv("TOKEN_LIFE_TIME"))
+	if err != nil {
+		return err
+	}
+	c.TokenConfig = TokenConfig{
+		IssuerName:      os.Getenv("TOKEN_ISSUE_NAME"),
+		JwtSignatureKey: []byte(os.Getenv("TOKEN_KEY")),
+		JwtLifeTime:     time.Duration(tokenLifeTime) * time.Hour,
+	}
+	if c.ApiPort == "" || c.Host == "" || c.Port == "" || c.User == "" || c.Password == "" || c.Name == "" || c.IssuerName == "" || c.JwtSignatureKey == nil || c.JwtLifeTime == 0 {
 		return errors.New("environment required")
 	}
 	return nil

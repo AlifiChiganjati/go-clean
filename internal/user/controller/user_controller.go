@@ -17,14 +17,14 @@ func NewUserController(uc usecase.UserUseCase) *UserController {
 	return &UserController{uc: uc}
 }
 
-func (e *UserController) RegisterNewUser(ctx *gin.Context) {
+func (e *UserController) RegisterHandler(ctx *gin.Context) {
 	var payload dto.UserRequestDto
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		helper.SendErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	createdUser, err := e.uc.RegisterNewUser(payload)
+	createdUser, err := e.uc.CreatedUser(payload)
 	if err != nil {
 		helper.SendErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -37,4 +37,22 @@ func (e *UserController) RegisterNewUser(ctx *gin.Context) {
 		Email:     createdUser.Email,
 	}
 	helper.SendCreateResponse(ctx, "Success", response)
+}
+
+func (u *UserController) LoginHandler(c *gin.Context) {
+	var payload dto.LoginRequestDto
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		helper.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	loginData, err := u.uc.Login(payload)
+	if err != nil {
+		if err.Error() == "1" {
+			helper.SendErrorResponse(c, http.StatusForbidden, "Password salah")
+			return
+		}
+		helper.SendErrorResponse(c, http.StatusForbidden, err.Error())
+		return
+	}
+	helper.SendSingleResponse(c, "success", loginData)
 }

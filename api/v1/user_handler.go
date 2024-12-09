@@ -10,14 +10,15 @@ type UserRoutes struct {
 	rg *gin.RouterGroup
 }
 
-func NewUserRoutes(uc controller.UserController, rg *gin.RouterGroup) *UserRoutes {
+func NewUserRoutes(ac controller.UserController, rg *gin.RouterGroup) *UserRoutes {
 	return &UserRoutes{
-		uc: uc,
+		uc: ac,
 		rg: rg,
 	}
 }
 
 func (ur *UserRoutes) Route() {
 	user := ur.rg.Group("/user")
-	user.POST("/register", ur.uc.RegisterNewUser)
+	user.POST("/register", ur.uc.RegisterHandler)
+	user.POST("/login", ur.uc.LoginHandler)
 }
