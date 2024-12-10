@@ -2,14 +2,11 @@ package helper
 
 import (
 	"fmt"
-	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/AlifiChiganjati/go-clean/internal/user/domain"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 )
 
 type JwtClaim struct {
@@ -23,11 +20,13 @@ var (
 	jwtSignatureKey  = []byte(os.Getenv("TOKEN_KEY"))
 )
 
+// GenerateTokenJwt creates a new JWT token with claims
 func GenerateTokenJwt(id string, expiredAt int64) (string, error) {
 	claims := JwtClaim{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    appName,
-			ExpiresAt: expiredAt, // expayet waktu login
+			ExpiresAt: expiredAt,
+			IssuedAt:  time.Now().Unix(),
 		},
 		DataClaims: domain.JwtClaims{
 			Id: id,
@@ -37,48 +36,26 @@ func GenerateTokenJwt(id string, expiredAt int64) (string, error) {
 	token := jwt.NewWithClaims(jwtSigningMethod, claims)
 	signedToken, err := token.SignedString(jwtSignatureKey)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error signing token: %w", err)
 	}
 	return signedToken, nil
 }
 
-func JWTAuth(roles ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		fmt.Println(authHeader)
-		if !strings.Contains(authHeader, "Bearer") {
-			SendErrorResponse(c, http.StatusForbidden, "Invalid Token")
-			c.Abort()
-			return
+func VerifyToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("invalid signing method")
 		}
-
-		// jwtSignatureKey := []byte(os.Getenv("SIGNATURE_KEY"))
-		tokenString := strings.Replace(authHeader, "Bearer ", "", -1)
-		claims := &JwtClaim{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtSignatureKey, nil
-		})
-		if err != nil {
-			SendErrorResponse(c, http.StatusInternalServerError, err.Error())
-			c.Abort()
-			return
-		}
-
-		if !token.Valid {
-			SendErrorResponse(c, http.StatusUnauthorized, "Unaunthorized user")
-			c.Abort()
-			return
-		}
-
-		expiredAt := claims.ExpiresAt
-		if time.Now().Unix() > expiredAt {
-			SendErrorResponse(c, http.StatusUnauthorized, "Expired Token")
-			c.Abort()
-			return
-		}
-
-		c.Set("claims", claims)
-
-		c.Next()
+		return jwtSignatureKey, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("token parse error: %w", err)
 	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
 }

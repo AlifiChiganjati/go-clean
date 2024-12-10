@@ -32,10 +32,11 @@ func (u *userRepository) Create(user domain.User) (domain.User, error) {
 
 func (u *userRepository) Get(id string) (domain.User, error) {
 	var user domain.User
-	result := u.db.First(&user, id)
+	result := u.db.Where("id = ?", id).First(&user)
 	if result.Error != nil {
 		return domain.User{}, result.Error
 	}
+	fmt.Println("ini id", result)
 	return user, nil
 }
 
@@ -43,8 +44,6 @@ func (u *userRepository) GetByEmail(email string) (domain.User, error) {
 	var user domain.User
 	result := u.db.Where("email = ?", email).First(&user)
 
-	fmt.Println("zzz", result)
-	fmt.Printf("RowsAffected: %d, Error: %v\n", result.RowsAffected, result.Error)
 	if result.Error != nil {
 		return domain.User{}, result.Error
 	}

@@ -33,6 +33,7 @@ func NewUserUseCase(repo repository.UserRepository) UserUseCase {
 
 func (u *userUseCase) GetById(id string) (domain.User, error) {
 	user, err := u.repo.Get(id)
+	fmt.Println("zzz", user)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("user with ID %s not found", id)
 	}

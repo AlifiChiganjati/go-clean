@@ -13,6 +13,13 @@ type UserResponseDto struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 }
+type UserGetByIdResponseDto struct {
+	Id           string `json:"id" gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `json:"email"`
+	ProfileImage string `json:"profile_image"`
+}
 
 type LoginRequestDto struct {
 	Email string `json:"email" binding:"required"`
@@ -21,5 +28,5 @@ type LoginRequestDto struct {
 
 type LoginResponseDto struct {
 	Token  string `json:"token"`
-	UserId string `json:"user_id"`
+	UserId string ``
 }
