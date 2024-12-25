@@ -25,12 +25,44 @@
 1. User Management
 2. Service Management
 3. View Banner
-4. Transaction Management
+4. Topup Management
+5. Transactions Management
 
 ## Task
 
 1. Init Project to github
 
 - [x] Install Gin and Gorm
-- [ ] Make Initialize Project: config & server
-- [ ] Push Project in Github
+- [x] Make Initialize Project: config & server
+- [x] Push Project in Github
+
+2. Database Design
+
+- [ ] Create ERD
+- [ ] Make sql script
+
+3. User Management
+
+- [ ] Auth Register User
+- [ ] Auth Login User
+- [ ] View Profile User Need Middleware Auth
+- [ ] Update Name User Need Middleware Auth
+- [ ] Update Profile Image Need Middleware Auth
+
+4. Service Management
+
+- [ ] View All Service this Using Middleware Auth
+
+5. View Banner
+
+- [ ] View All Banner
+
+6. Topup Management
+
+- [ ] View Balance Need Middleware Auth
+- [ ] Topup Saldo Need Middleware Auth
+
+7. Transactions Management
+
+- [ ] Transaction service Need Middleware Auth
+- [ ] View Transactions History Need Middleware Auth
