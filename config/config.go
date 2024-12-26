@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -12,8 +14,24 @@ type (
 		ApiPort string
 	}
 
+	DbConfig struct {
+		Host     string
+		Port     string
+		Name     string
+		Password string
+		User     string
+	}
+
+	TokenConfig struct {
+		IssuerName      string
+		JwtSignatureKey []byte
+		JwtLifeTime     time.Duration
+	}
+
 	Config struct {
 		ApiConfig
+		DbConfig
+		TokenConfig
 	}
 )
 
@@ -32,6 +50,25 @@ func (c *Config) readConfig() error {
 
 	c.ApiConfig = ApiConfig{
 		ApiPort: os.Getenv("API_PORT"),
+	}
+
+	c.DbConfig = DbConfig{
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		User:     os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		Name:     os.Getenv("DB_NAME"),
+	}
+
+	tokenLifeTime, err := strconv.Atoi(os.Getenv("TOKEN_LIFE_TIME"))
+	if err != nil {
+		return err
+	}
+
+	c.TokenConfig = TokenConfig{
+		IssuerName:      os.Getenv("TOKEN_ISSUE_NAME"),
+		JwtSignatureKey: []byte(os.Getenv("TOKEN_KEY")),
+		JwtLifeTime:     time.Duration(tokenLifeTime) * time.Hour,
 	}
 
 	if c.ApiPort == "" {

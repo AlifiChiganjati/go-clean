@@ -43,8 +43,8 @@
 
 3. User Management
 
-- [ ] Auth Register User
-- [ ] Auth Login User
+- [x] Auth Register User
+- [x] Auth Login User
 - [ ] View Profile User Need Middleware Auth
 - [ ] Update Name User Need Middleware Auth
 - [ ] Update Profile Image Need Middleware Auth
