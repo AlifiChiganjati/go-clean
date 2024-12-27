@@ -52,34 +52,30 @@ func (j *jwtToken) GenerateToken(payload domain.User) (dto.AuthResponseDto, erro
 
 func (j *jwtToken) VerifyToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
 		return j.cfg.JwtSignatureKey, nil
 	})
 	if err != nil {
-		return nil, errors.New("failed to verify token")
+		return nil, errors.New("failed to verify token: " + err.Error())
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !token.Valid || !ok || claims["iss"] != j.cfg.IssuerName {
-		return nil, errors.New("invalid claim token")
+		return nil, errors.New("invalid token claims")
 	}
 
 	return claims, nil
 }
 
 func (j *jwtToken) RefreshToken(oldTokenString string) (dto.AuthResponseDto, error) {
-	token, err := jwt.Parse(oldTokenString, func(token *jwt.Token) (interface{}, error) {
-		return j.cfg.JwtSignatureKey, nil
-	})
+	claims, err := j.VerifyToken(oldTokenString)
 	if err != nil {
 		return dto.AuthResponseDto{}, err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !token.Valid || !ok || claims["iss"] != j.cfg.IssuerName {
-		return dto.AuthResponseDto{}, errors.New("invalid claim token")
-	}
-
-	claims["exp"] = time.Now().Add(24 * time.Hour).Unix()
+	claims["exp"] = time.Now().Add(j.cfg.JwtLifeTime).Unix()
 
 	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	newTokenString, err := newToken.SignedString(j.cfg.JwtSignatureKey)

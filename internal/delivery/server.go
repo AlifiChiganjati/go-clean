@@ -8,6 +8,7 @@ import (
 	"github.com/AlifiChiganjati/go-clean/internal/auth/handler"
 	"github.com/AlifiChiganjati/go-clean/internal/auth/usecase"
 	router "github.com/AlifiChiganjati/go-clean/internal/delivery/http"
+	"github.com/AlifiChiganjati/go-clean/internal/delivery/middleware"
 	"github.com/AlifiChiganjati/go-clean/internal/manager"
 	"github.com/AlifiChiganjati/go-clean/pkg/jwt"
 	"github.com/gin-gonic/gin"
@@ -31,12 +32,13 @@ func NewServer() *Server {
 	if err != nil {
 		log.Fatal(err)
 	}
+	jwtService := jwt.NewJwtToken(cfg.TokenConfig)
 	repo := manager.NewRepoManager(infra)
 	uc := manager.NewUseCaseManager(repo)
-	hm := manager.NewHandlerManager(uc)
 	engine := gin.Default()
+	authMiddleware := middleware.NewAuthMiddleware(jwtService)
+	hm := manager.NewHandlerManager(uc, engine.Group("/api/v1"), authMiddleware)
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
-	jwtService := jwt.NewJwtToken(cfg.TokenConfig)
 	return &Server{
 		hm:         hm,
 		engine:     engine,
@@ -53,8 +55,10 @@ func (s *Server) setupRoutes() {
 		})
 	})
 
+	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
 	rg := s.engine.Group("/api/v1")
 	router.NewAuthRouter(*s.auth, rg).Route()
+	router.NewUserRouter(s.hm.UserHandler(), rg, authMiddleware).Route()
 }
 
 func (s *Server) Run() {

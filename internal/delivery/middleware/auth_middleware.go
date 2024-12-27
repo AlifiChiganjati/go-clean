@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -11,7 +10,7 @@ import (
 
 type (
 	AuthMiddleware interface {
-		RequireToken(id string) gin.HandlerFunc
+		RequireToken() gin.HandlerFunc
 	}
 
 	authMiddleware struct {
@@ -29,29 +28,33 @@ func NewAuthMiddleware(jwtService jwt.JwtToken) AuthMiddleware {
 	}
 }
 
-func (a *authMiddleware) RequireToken(id string) gin.HandlerFunc {
+func (a *authMiddleware) RequireToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var aH authHeader
-		if err := c.ShouldBindHeader(&aH); err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Missing Authorization header"})
 			return
 		}
 
-		tokenString := strings.Replace(aH.AuthorizationHeader, "Bearer ", "", -1)
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid Authorization token format"})
 			return
 		}
 
 		claims, err := a.jwtService.VerifyToken(tokenString)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid or expired token"})
 			return
 		}
 
-		fmt.Println("ini claims", claims)
-		c.Set("user", claims["user_id"])
+		userID, ok := claims["user_id"].(string)
+		if !ok || userID == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid user ID in token claims"})
+			return
+		}
 
+		c.Set("user", userID)
 		c.Next()
 	}
 }

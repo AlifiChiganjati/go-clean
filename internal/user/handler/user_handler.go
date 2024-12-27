@@ -1,1 +1,65 @@
 package handler
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/AlifiChiganjati/go-clean/internal/delivery/middleware"
+	"github.com/AlifiChiganjati/go-clean/internal/user/domain"
+	"github.com/AlifiChiganjati/go-clean/internal/user/usecase"
+	"github.com/AlifiChiganjati/go-clean/pkg/response"
+	"github.com/gin-gonic/gin"
+)
+
+type (
+	UserHandler interface {
+		GetHandler(c *gin.Context)
+	}
+
+	userHandler struct {
+		uc             usecase.UserUseCase
+		rg             *gin.RouterGroup
+		authMiddleware middleware.AuthMiddleware
+	}
+)
+
+func NewUserHanlder(uc usecase.UserUseCase, rg *gin.RouterGroup, authMiddleware middleware.AuthMiddleware) UserHandler {
+	return &userHandler{
+		uc:             uc,
+		rg:             rg,
+		authMiddleware: authMiddleware,
+	}
+}
+
+func (uh *userHandler) GetHandler(c *gin.Context) {
+	userID, exists := c.Get("user")
+	fmt.Println(userID)
+	if !exists {
+		response.SendErrorResponse(c, http.StatusUnauthorized, "Unauthorized: User not found in context")
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		response.SendErrorResponse(c, http.StatusInternalServerError, "Internal Server Error: Invalid user ID type")
+		return
+	}
+
+	rsp, err := uh.uc.FindById(userIDStr)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusNotFound, err.Error())
+		return
+	}
+	formattedCreatedAt := rsp.CreatedAt.Format("2006-01-02 15:04:05")
+	formattedUpdatedAt := rsp.UpdatedAt.Format("2006-01-02 15:04:05")
+
+	newRsp := domain.UserProfileResponse{
+		Email:        rsp.Email,
+		FirstName:    rsp.FirstName,
+		LastName:     rsp.LastName,
+		ProfileImage: rsp.ProfileImage,
+		CreatedAt:    formattedCreatedAt,
+		UpdatedAt:    formattedUpdatedAt,
+	}
+	response.SendSingleResponse(c, "ok", newRsp)
+}
