@@ -45,7 +45,7 @@
 
 - [x] Auth Register User
 - [x] Auth Login User
-- [ ] View Profile User Need Middleware Auth
+- [x] View Profile User Need Middleware Auth
 - [ ] Update Name User Need Middleware Auth
 - [ ] Update Profile Image Need Middleware Auth
 
