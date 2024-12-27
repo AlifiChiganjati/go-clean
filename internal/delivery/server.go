@@ -14,10 +14,11 @@ import (
 )
 
 type Server struct {
-	hm     manager.HandlerManager
-	auth   *handler.AuthHandler
-	engine *gin.Engine
-	host   string
+	hm         manager.HandlerManager
+	auth       *handler.AuthHandler
+	engine     *gin.Engine
+	host       string
+	jwtService jwt.JwtToken
 }
 
 func NewServer() *Server {
@@ -37,10 +38,11 @@ func NewServer() *Server {
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 	jwtService := jwt.NewJwtToken(cfg.TokenConfig)
 	return &Server{
-		hm:     hm,
-		engine: engine,
-		host:   host,
-		auth:   handler.NewAuthHandler(usecase.NewAuthUseCase(uc.UserUseCase(), jwtService)),
+		hm:         hm,
+		engine:     engine,
+		host:       host,
+		auth:       handler.NewAuthHandler(usecase.NewAuthUseCase(uc.UserUseCase(), jwtService)),
+		jwtService: jwtService,
 	}
 }
 
