@@ -88,7 +88,16 @@ func (uh *userHandler) UpdateNameHandler(c *gin.Context) {
 		response.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	fmt.Println(updateUser)
+	formattedCreatedAt := updateUser.CreatedAt.Format("2006-01-02 15:04:05")
+	formattedUpdatedAt := updateUser.UpdatedAt.Format("2006-01-02 15:04:05")
 
-	response.SendSingleResponse(c, "ok", updateUser)
+	newRsp := domain.UserProfileResponse{
+		Email:        updateUser.Email,
+		FirstName:    updateUser.FirstName,
+		LastName:     updateUser.LastName,
+		ProfileImage: updateUser.ProfileImage,
+		CreatedAt:    formattedCreatedAt,
+		UpdatedAt:    formattedUpdatedAt,
+	}
+	response.SendSingleResponse(c, "ok", newRsp)
 }

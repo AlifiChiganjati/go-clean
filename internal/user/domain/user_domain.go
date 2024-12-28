@@ -24,6 +24,6 @@ type (
 		LastName     string `json:"last_name"`
 		ProfileImage string `json:"profile_image"`
 		CreatedAt    string `json:"created_at"`
-		UpdatedAt    string `json:"UpdatedAt"`
+		UpdatedAt    string `json:"updated_at"`
 	}
 )

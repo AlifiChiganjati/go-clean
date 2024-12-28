@@ -24,5 +24,5 @@ func (ur *UserRouter) Route() {
 	user := ur.rg.Group("user")
 	user.Use(ur.authMiddleware.RequireToken())
 	user.GET("/profile", ur.uh.GetHandler)
-	user.PUT("/profile", ur.uh.UpdateNameHandler)
+	user.PUT("/profile/update", ur.uh.UpdateNameHandler)
 }
