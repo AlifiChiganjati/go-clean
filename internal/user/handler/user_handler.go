@@ -6,6 +6,7 @@ import (
 
 	"github.com/AlifiChiganjati/go-clean/internal/delivery/middleware"
 	"github.com/AlifiChiganjati/go-clean/internal/user/domain"
+	"github.com/AlifiChiganjati/go-clean/internal/user/dto"
 	"github.com/AlifiChiganjati/go-clean/internal/user/usecase"
 	"github.com/AlifiChiganjati/go-clean/pkg/response"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 type (
 	UserHandler interface {
 		GetHandler(c *gin.Context)
+		UpdateNameHandler(c *gin.Context)
 	}
 
 	userHandler struct {
@@ -62,4 +64,31 @@ func (uh *userHandler) GetHandler(c *gin.Context) {
 		UpdatedAt:    formattedUpdatedAt,
 	}
 	response.SendSingleResponse(c, "ok", newRsp)
+}
+
+func (uh *userHandler) UpdateNameHandler(c *gin.Context) {
+	userID, exists := c.Get("user")
+	if !exists {
+		response.SendErrorResponse(c, http.StatusUnauthorized, "Unauthorized: User not found in context")
+		return
+	}
+	userIDStr, ok := userID.(string)
+	if !ok {
+		response.SendErrorResponse(c, http.StatusInternalServerError, "Internal Server Error: Invalid user ID type")
+		return
+	}
+
+	var payload dto.UserUpdateNameDto
+	if err := c.BindJSON(&payload); err != nil {
+		response.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	updateUser, err := uh.uc.UpdateNameUser(payload, userIDStr)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	fmt.Println(updateUser)
+
+	response.SendSingleResponse(c, "ok", updateUser)
 }

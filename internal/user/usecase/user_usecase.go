@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlifiChiganjati/go-clean/internal/user/domain"
 	"github.com/AlifiChiganjati/go-clean/internal/user/dto"
@@ -15,6 +16,7 @@ type (
 		FindById(id string) (domain.User, error)
 		FindByEmailPassword(email string, password string) (domain.User, error)
 		RegisterNewUser(payload dto.UserRequestDto) (domain.User, error)
+		UpdateNameUser(payload dto.UserUpdateNameDto, id string) (domain.User, error)
 	}
 
 	userUseCase struct {
@@ -62,4 +64,29 @@ func (uc *userUseCase) RegisterNewUser(payload dto.UserRequestDto) (domain.User,
 	}
 
 	return uc.repo.Create(newUser)
+}
+
+func (uc *userUseCase) UpdateNameUser(payload dto.UserUpdateNameDto, id string) (domain.User, error) {
+	updateUser := domain.User{}
+
+	updateUser, err := uc.repo.Get(id)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	if payload.FirstName != "" {
+		updateUser.FirstName = payload.FirstName
+	}
+
+	if payload.LastName != "" {
+		updateUser.LastName = payload.LastName
+	}
+
+	updateUser.UpdatedAt = time.Now()
+	updateUser.Id = id
+	user, err := uc.repo.UpdateName(updateUser, id)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to update user : %v", err.Error())
+	}
+	return user, nil
 }

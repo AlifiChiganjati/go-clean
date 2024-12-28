@@ -8,7 +8,6 @@ import (
 	"github.com/AlifiChiganjati/go-clean/internal/auth/dto"
 	"github.com/AlifiChiganjati/go-clean/internal/user/domain"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 type (
@@ -20,7 +19,7 @@ type (
 
 	JwtTokenClaims struct {
 		jwt.RegisteredClaims
-		UserId uuid.UUID `json:"user_id"`
+		UserId string `json:"user_id"`
 	}
 
 	jwtToken struct {
