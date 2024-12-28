@@ -46,7 +46,7 @@
 - [x] Auth Register User
 - [x] Auth Login User
 - [x] View Profile User Need Middleware Auth
-- [ ] Update Name User Need Middleware Auth
+- [x] Update Name User Need Middleware Auth
 - [ ] Update Profile Image Need Middleware Auth
 
 4. Service Management
