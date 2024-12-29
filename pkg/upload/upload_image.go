@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -39,11 +38,6 @@ func FileImageHandler(c *gin.Context) (domain.User, error) {
 
 	fileName := fmt.Sprintf("%v_user_%s", rand.New(rand.NewSource(time.Now().UnixNano())).Int(), filepath.Ext(header.Filename))
 	fileLocation := filepath.Join("assets", "uploads", fileName)
-
-	if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
-		response.SendErrorResponse(c, http.StatusInternalServerError, "Failed to create upload directory")
-		return domain.User{}, err
-	}
 
 	if err := c.SaveUploadedFile(header, fileLocation); err != nil {
 		response.SendErrorResponse(c, http.StatusInternalServerError, "Failed to save the uploaded file")
