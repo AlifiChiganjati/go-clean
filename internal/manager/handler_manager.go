@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/AlifiChiganjati/go-clean/internal/delivery/middleware"
+	serviceHandler "github.com/AlifiChiganjati/go-clean/internal/services/handler"
 	"github.com/AlifiChiganjati/go-clean/internal/user/handler"
 	"github.com/gin-gonic/gin"
 )
@@ -9,6 +10,7 @@ import (
 type (
 	HandlerManager interface {
 		UserHandler() handler.UserHandler
+		ServiceHandler() serviceHandler.ServiceHandler
 	}
 	handlerManager struct {
 		uc             UseCaseManager
@@ -27,4 +29,8 @@ func NewHandlerManager(uc UseCaseManager, rg *gin.RouterGroup, authMiddleware mi
 
 func (hm *handlerManager) UserHandler() handler.UserHandler {
 	return handler.NewUserHanlder(hm.uc.UserUseCase(), hm.rg, hm.authMiddleware)
+}
+
+func (hm *handlerManager) ServiceHandler() serviceHandler.ServiceHandler {
+	return serviceHandler.NewUserHanlder(hm.uc.ServiceUseCase(), hm.rg, hm.authMiddleware)
 }

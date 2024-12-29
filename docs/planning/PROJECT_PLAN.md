@@ -51,7 +51,7 @@
 
 4. Service Management
 
-- [ ] View All Service this Using Middleware Auth
+- [x] View All Service this Using Middleware Auth
 
 5. View Banner
 

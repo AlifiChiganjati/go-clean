@@ -59,6 +59,7 @@ func (s *Server) setupRoutes() {
 	rg := s.engine.Group("/api/v1")
 	router.NewAuthRouter(*s.auth, rg).Route()
 	router.NewUserRouter(s.hm.UserHandler(), rg, authMiddleware).Route()
+	router.NewServiceRouter(s.hm.ServiceHandler(), rg, authMiddleware).Route()
 }
 
 func (s *Server) Run() {
