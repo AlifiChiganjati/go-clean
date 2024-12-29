@@ -30,4 +30,8 @@ type (
 		CreatedAt string `json:"created_at"`
 		UpdateAt  string `json:"updated_at"`
 	}
+
+	UserUpdateProfileImageDto struct {
+		ProfileImage string `json:"profile_image"`
+	}
 )

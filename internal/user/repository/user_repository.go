@@ -14,6 +14,7 @@ type (
 		GetByEmail(email string) (domain.User, error)
 		Create(payload dto.UserRequestDto) (domain.User, error)
 		UpdateName(payload domain.User, id string) (domain.User, error)
+		UpdateProfileImg(payload domain.User, id string) (domain.User, error)
 	}
 
 	userRepository struct {
@@ -73,5 +74,20 @@ func (u *userRepository) UpdateName(payload domain.User, id string) (domain.User
 		return domain.User{}, nil
 	}
 	fmt.Println("ini user repository", user)
+	return user, nil
+}
+
+func (u *userRepository) UpdateProfileImg(payload domain.User, id string) (domain.User, error) {
+	var user domain.User
+	if result := u.db.First(&user, "id= ?", id); result.Error != nil {
+		return domain.User{}, result.Error
+	}
+	user.ProfileImage = payload.ProfileImage
+
+	if result := u.db.Model(&user).Updates(map[string]interface{}{
+		"profile_image": user.ProfileImage,
+	}); result.Error != nil {
+		return domain.User{}, result.Error
+	}
 	return user, nil
 }

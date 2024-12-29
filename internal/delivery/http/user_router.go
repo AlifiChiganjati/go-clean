@@ -25,4 +25,5 @@ func (ur *UserRouter) Route() {
 	user.Use(ur.authMiddleware.RequireToken())
 	user.GET("/profile", ur.uh.GetHandler)
 	user.PUT("/profile/update", ur.uh.UpdateNameHandler)
+	user.PUT("/profile/image", ur.uh.UpdateProfileImgHandler)
 }

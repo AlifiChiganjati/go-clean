@@ -9,6 +9,7 @@ import (
 	"github.com/AlifiChiganjati/go-clean/internal/user/dto"
 	"github.com/AlifiChiganjati/go-clean/internal/user/usecase"
 	"github.com/AlifiChiganjati/go-clean/pkg/response"
+	"github.com/AlifiChiganjati/go-clean/pkg/upload"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +17,7 @@ type (
 	UserHandler interface {
 		GetHandler(c *gin.Context)
 		UpdateNameHandler(c *gin.Context)
+		UpdateProfileImgHandler(c *gin.Context)
 	}
 
 	userHandler struct {
@@ -99,5 +101,49 @@ func (uh *userHandler) UpdateNameHandler(c *gin.Context) {
 		CreatedAt:    formattedCreatedAt,
 		UpdatedAt:    formattedUpdatedAt,
 	}
+	response.SendSingleResponse(c, "ok", newRsp)
+}
+
+func (uh *userHandler) UpdateProfileImgHandler(c *gin.Context) {
+	userID, exists := c.Get("user")
+	if !exists {
+		response.SendErrorResponse(c, http.StatusUnauthorized, "Unauthorized: User not found in context")
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		response.SendErrorResponse(c, http.StatusInternalServerError, "Internal Server Error: Invalid user ID type")
+		return
+	}
+
+	userCredential, err := upload.FileImageHandler(c)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	if userCredential.Id != userIDStr {
+		response.SendErrorResponse(c, http.StatusForbidden, "You can only update your own profile image")
+		return
+	}
+
+	updatedUser, err := uh.uc.UpdateProfileImg(userCredential, userIDStr)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	formattedCreatedAt := updatedUser.CreatedAt.Format("2006-01-02 15:04:05")
+	formattedUpdatedAt := updatedUser.UpdatedAt.Format("2006-01-02 15:04:05")
+
+	newRsp := domain.UserProfileResponse{
+		Email:        updatedUser.Email,
+		FirstName:    updatedUser.FirstName,
+		LastName:     updatedUser.LastName,
+		ProfileImage: updatedUser.ProfileImage,
+		CreatedAt:    formattedCreatedAt,
+		UpdatedAt:    formattedUpdatedAt,
+	}
+
 	response.SendSingleResponse(c, "ok", newRsp)
 }
