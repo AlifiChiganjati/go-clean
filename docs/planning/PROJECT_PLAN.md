@@ -55,7 +55,7 @@
 
 5. View Banner
 
-- [ ] View All Banner
+- [x] View All Banner
 
 6. Topup Management
 
