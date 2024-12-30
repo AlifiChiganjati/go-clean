@@ -1,6 +1,7 @@
 package manager
 
 import (
+	bannerHandler "github.com/AlifiChiganjati/go-clean/internal/banner/handler"
 	"github.com/AlifiChiganjati/go-clean/internal/delivery/middleware"
 	serviceHandler "github.com/AlifiChiganjati/go-clean/internal/services/handler"
 	"github.com/AlifiChiganjati/go-clean/internal/user/handler"
@@ -11,6 +12,7 @@ type (
 	HandlerManager interface {
 		UserHandler() handler.UserHandler
 		ServiceHandler() serviceHandler.ServiceHandler
+		BannerHandler() bannerHandler.BannerHandler
 	}
 	handlerManager struct {
 		uc             UseCaseManager
@@ -33,4 +35,8 @@ func (hm *handlerManager) UserHandler() handler.UserHandler {
 
 func (hm *handlerManager) ServiceHandler() serviceHandler.ServiceHandler {
 	return serviceHandler.NewUserHanlder(hm.uc.ServiceUseCase(), hm.rg, hm.authMiddleware)
+}
+
+func (hm *handlerManager) BannerHandler() bannerHandler.BannerHandler {
+	return bannerHandler.NewBannerHandler(hm.uc.BannerUseCase(), hm.rg)
 }

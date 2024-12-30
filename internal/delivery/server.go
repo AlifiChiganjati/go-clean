@@ -60,6 +60,7 @@ func (s *Server) setupRoutes() {
 	router.NewAuthRouter(*s.auth, rg).Route()
 	router.NewUserRouter(s.hm.UserHandler(), rg, authMiddleware).Route()
 	router.NewServiceRouter(s.hm.ServiceHandler(), rg, authMiddleware).Route()
+	router.NewBannerRouter(s.hm.BannerHandler(), rg).Route()
 }
 
 func (s *Server) Run() {
