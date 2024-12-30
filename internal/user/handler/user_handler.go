@@ -18,6 +18,7 @@ type (
 		GetHandler(c *gin.Context)
 		UpdateNameHandler(c *gin.Context)
 		UpdateProfileImgHandler(c *gin.Context)
+		GetBalanceHandler(c *gin.Context)
 	}
 
 	userHandler struct {
@@ -143,6 +144,37 @@ func (uh *userHandler) UpdateProfileImgHandler(c *gin.Context) {
 		ProfileImage: updatedUser.ProfileImage,
 		CreatedAt:    formattedCreatedAt,
 		UpdatedAt:    formattedUpdatedAt,
+	}
+
+	response.SendSingleResponse(c, "ok", newRsp)
+}
+
+func (uh *userHandler) GetBalanceHandler(c *gin.Context) {
+	userID, exists := c.Get("user")
+	fmt.Println(userID)
+	if !exists {
+		response.SendErrorResponse(c, http.StatusUnauthorized, "Unauthorized: User not found in context")
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		response.SendErrorResponse(c, http.StatusInternalServerError, "Internal Server Error: Invalid user ID type")
+		return
+	}
+
+	rsp, err := uh.uc.FindById(userIDStr)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusNotFound, err.Error())
+		return
+	}
+	formattedCreatedAt := rsp.CreatedAt.Format("2006-01-02 15:04:05")
+	formattedUpdatedAt := rsp.UpdatedAt.Format("2006-01-02 15:04:05")
+
+	newRsp := domain.UserBalanceResponse{
+		Saldo:     rsp.Saldo,
+		CreatedAt: formattedCreatedAt,
+		UpdatedAt: formattedUpdatedAt,
 	}
 
 	response.SendSingleResponse(c, "ok", newRsp)

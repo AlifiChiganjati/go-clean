@@ -26,4 +26,5 @@ func (ur *UserRouter) Route() {
 	user.GET("/profile", ur.uh.GetHandler)
 	user.PUT("/profile/update", ur.uh.UpdateNameHandler)
 	user.PUT("/profile/image", ur.uh.UpdateProfileImgHandler)
+	user.GET("/balance", ur.uh.GetBalanceHandler)
 }

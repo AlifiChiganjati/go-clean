@@ -26,4 +26,10 @@ type (
 		CreatedAt    string `json:"created_at"`
 		UpdatedAt    string `json:"updated_at"`
 	}
+
+	UserBalanceResponse struct {
+		Saldo     float64 `json:"saldo"`
+		CreatedAt string  `json:"created_at"`
+		UpdatedAt string  `json:"updated_at"`
+	}
 )
