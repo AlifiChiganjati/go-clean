@@ -34,4 +34,8 @@ type (
 	UserUpdateProfileImageDto struct {
 		ProfileImage string `json:"profile_image"`
 	}
+
+	TopUpRequestDto struct {
+		TopUpAmount float64 `json:"top_up_amount" binding:"required"`
+	}
 )

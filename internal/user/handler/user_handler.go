@@ -19,6 +19,7 @@ type (
 		UpdateNameHandler(c *gin.Context)
 		UpdateProfileImgHandler(c *gin.Context)
 		GetBalanceHandler(c *gin.Context)
+		UpdateSaldo(c *gin.Context)
 	}
 
 	userHandler struct {
@@ -173,6 +174,43 @@ func (uh *userHandler) GetBalanceHandler(c *gin.Context) {
 
 	newRsp := domain.UserBalanceResponse{
 		Saldo:     rsp.Saldo,
+		CreatedAt: formattedCreatedAt,
+		UpdatedAt: formattedUpdatedAt,
+	}
+
+	response.SendSingleResponse(c, "ok", newRsp)
+}
+
+func (uh *userHandler) UpdateSaldo(c *gin.Context) {
+	userID, exists := c.Get("user")
+	if !exists {
+		response.SendErrorResponse(c, http.StatusUnauthorized, "Unauthorized: User not found in context")
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		response.SendErrorResponse(c, http.StatusInternalServerError, "Internal Server Error: Invalid user ID type")
+		return
+	}
+
+	var payload dto.TopUpRequestDto
+	if err := c.BindJSON(&payload); err != nil {
+		response.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	updateUser, err := uh.uc.UpdateSaldo(payload, userIDStr)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	formattedCreatedAt := updateUser.CreatedAt.Format("2006-01-02 15:04:05")
+	formattedUpdatedAt := updateUser.UpdatedAt.Format("2006-01-02 15:04:05")
+
+	newRsp := domain.UserBalanceResponse{
+		Saldo:     updateUser.Saldo,
 		CreatedAt: formattedCreatedAt,
 		UpdatedAt: formattedUpdatedAt,
 	}

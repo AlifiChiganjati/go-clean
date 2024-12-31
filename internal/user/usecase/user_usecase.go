@@ -18,6 +18,7 @@ type (
 		RegisterNewUser(payload dto.UserRequestDto) (domain.User, error)
 		UpdateNameUser(payload dto.UserUpdateNameDto, id string) (domain.User, error)
 		UpdateProfileImg(payload domain.User, id string) (domain.User, error)
+		UpdateSaldo(payload dto.TopUpRequestDto, id string) (domain.User, error)
 	}
 
 	userUseCase struct {
@@ -107,6 +108,24 @@ func (uc *userUseCase) UpdateProfileImg(payload domain.User, id string) (domain.
 	user, err := uc.repo.UpdateProfileImg(updatedUser, id)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to update profile image: %v", err)
+	}
+
+	return user, nil
+}
+
+func (uc *userUseCase) UpdateSaldo(payload dto.TopUpRequestDto, id string) (domain.User, error) {
+	updatedUser, err := uc.repo.Get(id)
+	if err != nil {
+		return domain.User{}, err
+	}
+	updatedUser.Saldo += payload.TopUpAmount
+
+	updatedUser.Id = id
+	updatedUser.UpdatedAt = time.Now()
+
+	user, err := uc.repo.UpdateSaldo(updatedUser, id)
+	if err != nil {
+		return domain.User{}, err
 	}
 
 	return user, nil

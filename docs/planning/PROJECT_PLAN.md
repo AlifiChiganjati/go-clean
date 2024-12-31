@@ -59,7 +59,7 @@
 
 6. Topup Management
 
-- [ ] View Balance Need Middleware Auth
+- [x] View Balance Need Middleware Auth
 - [ ] Topup Saldo Need Middleware Auth
 
 7. Transactions Management

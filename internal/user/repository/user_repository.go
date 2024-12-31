@@ -15,6 +15,7 @@ type (
 		Create(payload dto.UserRequestDto) (domain.User, error)
 		UpdateName(payload domain.User, id string) (domain.User, error)
 		UpdateProfileImg(payload domain.User, id string) (domain.User, error)
+		UpdateSaldo(payload domain.User, id string) (domain.User, error)
 	}
 
 	userRepository struct {
@@ -89,5 +90,21 @@ func (u *userRepository) UpdateProfileImg(payload domain.User, id string) (domai
 	}); result.Error != nil {
 		return domain.User{}, result.Error
 	}
+	return user, nil
+}
+
+func (u *userRepository) UpdateSaldo(payload domain.User, id string) (domain.User, error) {
+	var user domain.User
+	if result := u.db.First(&user, "id= ?", id); result.Error != nil {
+		return domain.User{}, result.Error
+	}
+	user.Saldo = payload.Saldo
+
+	if result := u.db.Model(&user).Updates(map[string]interface{}{
+		"saldo": user.Saldo,
+	}); result.Error != nil {
+		return domain.User{}, result.Error
+	}
+
 	return user, nil
 }
